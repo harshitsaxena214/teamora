@@ -4,7 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "postinstall": "npx prisma generate",
+    "postinstall": "prisma generate",
+    "build": "echo \"build complete\"",
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
