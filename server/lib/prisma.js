@@ -10,8 +10,10 @@ if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is missing");
 }
 
+const databaseUrl = process.env.DATABASE_URL.trim(); 
+
 // DB connection
-const sql = neon(process.env.DATABASE_URL);
+const sql = neon(databaseUrl);
 const adapter = new PrismaNeon(sql);
 
 // Singleton
@@ -29,5 +31,6 @@ export const prisma =
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
+console.log("DATABASE_URL:", process.env.DATABASE_URL);
 
 export default prisma;
