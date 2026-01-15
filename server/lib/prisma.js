@@ -10,13 +10,13 @@ let prisma;
 export function getPrisma() {
   if (prisma) return prisma;
 
-  const url = process.env.DATABASE_URL;
+  const connectionString = process.env.DATABASE_URL;
 
-  if (!url) {
+  if (!connectionString) {
     throw new Error("DATABASE_URL is missing at runtime");
   }
 
-  const sql = neon(url);              // ← happens ONLY at execution time
+  const sql = neon(connectionString);
   const adapter = new PrismaNeon(sql);
 
   prisma = new PrismaClient({ adapter });
