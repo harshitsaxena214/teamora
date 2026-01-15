@@ -1,4 +1,4 @@
-import "dotenv/config";
+import 'dotenv/config'
 import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { neon, neonConfig } from "@neondatabase/serverless";
@@ -6,31 +6,32 @@ import ws from "ws";
 
 neonConfig.webSocketConstructor = ws;
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL is missing");
-}
+let prisma;
 
-const databaseUrl = process.env.DATABASE_URL.trim(); 
+/**
+ * Lazy Prisma client — REQUIRED for Vercel + Inngest
+ */
+export function getPrisma() {
+  if (prisma) return prisma;
 
-// DB connection
-const sql = neon(databaseUrl);
-const adapter = new PrismaNeon(sql);
+  const databaseUrl = process.env.DATABASE_URL;
 
-// Singleton
-const globalForPrisma = globalThis;
+  if (!databaseUrl) {
+    throw new Error("DATABASE_URL is missing at runtime");
+  }
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
+  const sql = neon(databaseUrl.trim());
+  const adapter = new PrismaNeon(sql);
+
+  prisma = new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === "development"
-      ? ["query", "warn", "error"]
-      : ["error"],
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["query", "warn", "error"]
+        : ["error"],
   });
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+  return prisma;
 }
-console.log("DATABASE_URL:", process.env.DATABASE_URL);
 
-export default prisma;
+export default getPrisma;
