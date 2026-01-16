@@ -1,6 +1,6 @@
 import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaNeon } from "@prisma/adapter-neon";
-import { neon, neonConfig } from "@neondatabase/serverless";
+import { Pool, neonConfig } from "@neondatabase/serverless";
 import ws from "ws";
 
 // Required for Node.js runtimes (Vercel serverless)
@@ -8,21 +8,19 @@ neonConfig.webSocketConstructor = ws;
 
 let prisma;
 
-/**
- * Serverless-safe Prisma client
- * Works with Vercel + Inngest
- */
 export function getPrisma() {
   if (prisma) return prisma;
 
-  const url = process.env.DATABASE_URL?.trim();
+  const connectionString = process.env.DATABASE_URL?.trim();
 
-  if (!url) {
+  if (!connectionString) {
     throw new Error("DATABASE_URL is missing or empty");
   }
 
-  const sql = neon(url);              // Create Neon client
-  const adapter = new PrismaNeon(sql); // Pass client to adapter
+  const pool = new Pool({ connectionString });
+
+  // 4. Create the Adapter
+  const adapter = new PrismaNeon(pool);
 
   prisma = new PrismaClient({
     adapter,
@@ -34,5 +32,10 @@ export function getPrisma() {
 
   return prisma;
 }
+
+console.log(
+  typeof process.env.DATABASE_URL,
+  JSON.stringify(process.env.DATABASE_URL)
+);
 
 export default getPrisma;
