@@ -1,5 +1,5 @@
 import { Inngest } from "inngest";
-import getPrisma from "../lib/prisma.js";
+import prisma from "../lib/prisma.js"; // <--- Import the instance directly
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "teamora" });
@@ -8,11 +8,11 @@ const syncUserCreation = inngest.createFunction(
   { id: "sync-user-from-clerk" },
   { event: "clerk/user.created" },
   async ({ event, step }) => {
-    const prisma = getPrisma();
+    // REMOVED: const prisma = getPrisma();
     const { data } = event;
 
     await step.run("create-user", async () => {
-      return prisma.user.create({
+      return prisma.user.create({ // <--- Use the imported 'prisma' directly
         data: {
           id: data.id,
           email: data?.email_addresses?.[0]?.email_address,
@@ -30,7 +30,6 @@ const syncUserDeletion = inngest.createFunction(
   { id: "delete-user-from-clerk" },
   { event: "clerk/user.deleted" },
   async ({ event, step }) => {
-    const prisma = getPrisma();
     const { data } = event;
 
     await step.run("delete-user", async () => {
@@ -47,7 +46,6 @@ const syncUserUpdation = inngest.createFunction(
   { id: "update-user-from-clerk" },
   { event: "clerk/user.updated" },
   async ({ event, step }) => {
-    const prisma = getPrisma();
     const { data } = event;
 
     await step.run("update-user", async () => {
