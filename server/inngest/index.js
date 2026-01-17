@@ -79,6 +79,9 @@ const syncWorkspaceCreation = inngest.createFunction(
         },
       });
     });
+
+    console.log("Inngest ownerId:", ownerId); 
+    
     // Add creator as ADMIN member of the workspace
     await step.run("add-admin-member", async () => {
       return prisma.workspaceMember.create({
