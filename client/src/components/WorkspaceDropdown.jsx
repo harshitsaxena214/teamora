@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check, Plus } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setCurrentWorkspace } from "../features/workspaceSlice";
 import {
   useClerk,
@@ -17,18 +17,20 @@ function WorkspaceDropdown() {
   const { openCreateOrganization } = useClerk();
   const dispatch = useDispatch();
 
+  // Get workspaces from Redux to access full workspace data
+  const workspaces = useSelector((state) => state.workspace.workspaces);
+
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   const onSelectWorkspace = (organization) => {
+    // Set active organization in Clerk
     setActive({ organization: organization.id });
-    dispatch(
-      setCurrentWorkspace({
-        id: organization.id,
-        name: organization.name,
-        imageUrl: organization.imageUrl,
-      })
-    );
+    
+    // Dispatch only the workspace ID to Redux
+    // The reducer will find the full workspace data from state.workspaces
+    dispatch(setCurrentWorkspace(organization.id));
+    
     setIsOpen(false);
   };
 
